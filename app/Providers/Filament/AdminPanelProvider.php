@@ -84,8 +84,8 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            // ->sidebarCollapsibleOnDesktop(true)
-            ->topNavigation()
+            ->sidebarCollapsibleOnDesktop(true)
+            //->topNavigation()
             ->authMiddleware([
                 Authenticate::class,
             ])
