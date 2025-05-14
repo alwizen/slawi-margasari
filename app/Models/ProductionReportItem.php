@@ -12,7 +12,7 @@ class ProductionReportItem extends Model
     // add fillable
     protected $fillable = [
         'production_report_id',
-        'daily_menu_id',
+        'daily_menu_item_id',
         'target_qty',
         'actual_qty',
         'status',
@@ -22,6 +22,7 @@ class ProductionReportItem extends Model
     {
         return $this->belongsTo(ProductionReport::class);
     }
+
     public function dailyMenuItem():BelongsTo
     {
         return $this->belongsTo(DailyMenuItem::class);

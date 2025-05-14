@@ -14,6 +14,11 @@ class DailyMenuItem extends Model
         return $this->belongsTo(DailyMenu::class);
     }
 
+    public function menu(): BelongsTo
+{
+    return $this->belongsTo(DailyMenu::class); // atau MenuItem, tergantung strukturmu
+}
+
     public function nutrient():BelongsTo
     {
         return $this->belongsTo(Nutrient::class);
