@@ -80,11 +80,15 @@ class DailyMenuResource extends Resource
                             TextInput::make('menu_name')
                                 ->label('Menu yang Disajikan')
                                 ->required(),
+                            TextInput::make('qty')
+                                ->label('Jumlah')
+                                ->numeric()
+                                ->required(),
 
                             Hidden::make('nutrient_id'),
                         ])
                         ->default([])
-                        ->columns(3),
+                        ->columns(4),
                 ]),
         ]);
 }
@@ -99,6 +103,10 @@ class DailyMenuResource extends Resource
                 TextColumn::make('items_count')
                     ->label('Jumlah Nutrisi')
                     ->counts('items'),
+                TextColumn::make('qty')
+                    ->label('Target Masak')
+                    // ->counts('items.qty')
+                    ->sortable(),
             ])
             ->actions([
                 Tables\Actions\Action::make('View Detail')
@@ -113,8 +121,9 @@ class DailyMenuResource extends Resource
                                     ->schema([
                                         TextEntry::make('nutrient.name')->label('Nutrisi'),
                                         TextEntry::make('menu_name')->label('Menu'),
+                                        TextEntry::make('qty')->label('Jumlah'),
                                     ])
-                                    ->columns(2),
+                                    ->columns(3),
                             ]),
                     ])
                     ->slideOver()

@@ -33,7 +33,7 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
-    protected static ?string $navigationGroup = 'Pembelian';
+    protected static ?string $navigationGroup = 'Pengadaan & Permintaan';
 
     protected static ?string $navigationLabel = 'Pemesanan Pembelian';
 

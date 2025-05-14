@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-Route::middleware([
-    'auth',
-    config('filament.middleware.base'),
-])
-->name('filament.resources.stock-issues.')
-    ->prefix(config('filament.path'))
-    ->group(function () {
-        // Rute untuk halaman proses penyiapan bahan
-        Route::get('/stock-issues/{record}/process', ProcessStockIssue::class)
-            ->name('process');
-    });
+// Route::middleware([
+//     'auth',
+//     config('filament.middleware.base'),
+// ])
+// ->name('filament.resources.stock-issues.')
+//     ->prefix(config('filament.path'))
+//     ->group(function () {
+//         // Rute untuk halaman proses penyiapan bahan
+//         Route::get('/stock-issues/{record}/process', ProcessStockIssue::class)
+//             ->name('process');
+//     });
