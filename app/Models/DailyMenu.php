@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DailyMenu extends Model
 {
     //
-
     protected $fillable = ['nutrition_plan_id', 'date'];
 
     public function nutritionPlan(): BelongsTo
@@ -23,7 +22,7 @@ class DailyMenu extends Model
     }
 
     // add guaded
-    protected $guarded = ['id'];
+//    protected $guarded = ['id'];
     // add hidden
     protected $hidden = ['created_at', 'updated_at'];
 }

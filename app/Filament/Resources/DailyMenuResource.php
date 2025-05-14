@@ -36,62 +36,63 @@ class DailyMenuResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            Card::make()
-                ->schema([
-                    Select::make('nutrition_plan_id')
-                        ->label('Tanggal (Nutrition Plan)')
-                        ->options(NutritionPlan::query()->pluck('date', 'id'))
-                        ->searchable()
-                        ->required()
-                        ->reactive()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            $plan = NutritionPlan::with('items.nutrient')->find($state);
+            ->schema([
+                Card::make()
+                    ->schema([
+                        Select::make('nutrition_plan_id')
+                            ->label('Tanggal (Nutrition Plan)')
+                            ->options(NutritionPlan::query()->pluck('date', 'id'))
+                            ->searchable()
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $plan = NutritionPlan::with('items.nutrient')->find($state);
 
-                            $items = collect($plan?->items)->map(function ($item) {
-                                return [
-                                    'nutrient_id' => $item->nutrient_id,
-                                    'menu_name' => null,
-                                    'nutrient_name' => $item->nutrient->name ?? '',
-                                    'unit' => $item->nutrient->unit ?? '',
-                                    'amount' => $item->amount,
-                                ];
-                            })->toArray();
+                                $items = collect($plan?->items)->map(function ($item) {
+                                    return [
+                                        'nutrient_id' => $item->nutrient_id,
+                                        'menu_name' => null,
+                                        'nutrient_name' => $item->nutrient->name ?? '',
+                                        'unit' => $item->nutrient->unit ?? '',
+                                        'amount' => $item->amount,
+                                    ];
+                                })->toArray();
 
-                            $set('items', $items);
-                        }),
-                ]),
+                                $set('items', $items);
+                            }),
+                    ]),
 
-            Card::make()
-                ->schema([
-                    Repeater::make('items')
-                        ->relationship()
-                        ->label('Menu Harian')
-                        ->schema([
-                            TextInput::make('nutrient_name')
-                                ->label('Nutrisi')
-                                ->disabled(),
+                Card::make()
+                    ->schema([
+                        Repeater::make('items')
+                            ->relationship()
+                            ->label('Menu Harian')
+                            ->schema([
+                                TextInput::make('nutrient_name')
+                                    ->label('Nutrisi')
+                                    ->disabled(),
 
-                            TextInput::make('amount')
-                                ->label('Kebutuhan')
-                                ->suffix(fn ($state, $record) => $record['unit'] ?? '')
-                                ->disabled(),
+                                TextInput::make('amount')
+                                    ->label('Kebutuhan')
+                                    ->suffix(fn($state, $record) => $record['unit'] ?? '')
+                                    ->disabled(),
 
-                            TextInput::make('menu_name')
-                                ->label('Menu yang Disajikan')
-                                ->required(),
-                            TextInput::make('qty')
-                                ->label('Jumlah')
-                                ->numeric()
-                                ->required(),
+                                TextInput::make('menu_name')
+                                    ->label('Menu yang Disajikan')
+                                    ->required(),
+                                TextInput::make('qty')
+                                    ->label('Jumlah')
+                                    ->numeric()
+                                    ->required(),
 
-                            Hidden::make('nutrient_id'),
-                        ])
-                        ->default([])
-                        ->columns(4),
-                ]),
-        ]);
-}
+                                Hidden::make('nutrient_id'),
+                            ])
+                            ->default([])
+                            ->columns(4),
+                    ]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table

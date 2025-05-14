@@ -110,6 +110,7 @@ class NutritionPlanResource extends Resource
                                         'nutrient_id' => $item->nutrient_id,
                                         'item_id' => $item->id,
                                         'menu_name' => '',
+                                        'qty' => '',
                                     ];
                                 })->toArray();
                                 
@@ -151,6 +152,7 @@ class NutritionPlanResource extends Resource
                                             'nutrient_id' => $item->nutrient_id,
                                             'item_id' => $item->id,
                                             'menu_name' => $item->menu_name ?? '',
+                                            'qty' => $item->qty ?? '',
                                         ];
                                     })->toArray();
                                     
@@ -180,6 +182,10 @@ class NutritionPlanResource extends Resource
                                         ->label('Menu yang Disajikan')
                                         ->required(),
 
+                                        TextInput::make('qty')
+                                        ->label('Target Produksi')
+                                        ->required(),
+
                                     Hidden::make('nutrient_id'),
                                     Hidden::make('unit'),
                                     Hidden::make('item_id'),
@@ -204,11 +210,11 @@ class NutritionPlanResource extends Resource
                     ->label('Jumlah Nutrisi')
                     ->counts('items'),
                     
-                Tables\Columns\TextColumn::make('items.menu_name')
-                    ->label('Menu')
-                    ->listWithLineBreaks()
-                    ->limitList(3)
-                    ->expandableLimitedList(),
+                // Tables\Columns\TextColumn::make('items.menu_name')
+                //     ->label('Menu')
+                //     ->listWithLineBreaks()
+                //     ->limitList(3)
+                //     ->expandableLimitedList(),
             ])
             ->filters([
                 //
@@ -231,8 +237,9 @@ class NutritionPlanResource extends Resource
                                             ->numeric()
                                             ->suffix(fn($record) => optional($record->nutrient)->unit ?? ''),
                                         TextEntry::make('menu_name')->label('Menu yang Disajikan'),
+                                        TextEntry::make('qty')->label('Target Produksi'),
                                     ])
-                                    ->columns(3),
+                                    ->columns(4),
                             ]),
                     ])
                     ->slideOver()

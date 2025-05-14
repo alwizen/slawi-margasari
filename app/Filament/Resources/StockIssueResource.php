@@ -163,6 +163,19 @@ class StockIssueResource extends Resource
             ]);
     }
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'mark_prepared'
+        ];
+    }
+
     public static function getRelations(): array
     {
         return [

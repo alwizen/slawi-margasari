@@ -88,18 +88,4 @@ return [
         'enabled' => true,
     ],
 
-    'resources' => [
-    App\Filament\Resources\PurchaseOrderResource::class => [
-        'permissions' => [
-            'view',
-            'view_any',
-            'create',
-            'update',
-            'delete',
-            'approve', // ✅ tambahkan custom permission
-            'reject',  // jika ingin ada juga
-        ],
-    ],
-],
-
 ];
