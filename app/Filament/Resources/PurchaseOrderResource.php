@@ -247,8 +247,24 @@ class PurchaseOrderResource extends Resource
                     ->action(function (PurchaseOrder $record) {
                         $record->update(['status' => 'Ordered']);
                     })
-                    ->url(fn(PurchaseOrder $record) => 'https://wa.me/' . preg_replace('/[^0-9]/', '', $record->supplier->phone) . '?text=' . urlencode(
-                        "**Purchase Order #" . $record->id . "**\n" .
+                    ->url(function(PurchaseOrder $record) {
+                        // Ambil nomor telepon supplier
+                        $phoneNumber = preg_replace('/[^0-9]/', '', $record->supplier->phone);
+                        
+                        // Format nomor telepon ke format internasional Indonesia
+                        if (strlen($phoneNumber) > 0) {
+                            if (substr($phoneNumber, 0, 1) === '0') {
+                                // Jika dimulai dengan 0, ganti dengan 62
+                                $phoneNumber = '62' . substr($phoneNumber, 1);
+                            } 
+                            // Jika nomor tidak dimulai dengan '62', tambahkan '62'
+                            elseif (substr($phoneNumber, 0, 2) !== '62') {
+                                $phoneNumber = '62' . $phoneNumber;
+                            }
+                        }
+                        
+                        // Format pesan WhatsApp
+                        $message = "**Purchase Order **". "\n". $record->order_number . "\n" .
                             "Tanggal: " . \Carbon\Carbon::parse($record->order_date)->format('d-m-Y') . "\n" .
                             "Supplier: " . $record->supplier->name . "\n\n" .
                             "📦 Daftar Barang:\n" .
@@ -256,8 +272,13 @@ class PurchaseOrderResource extends Resource
                                 fn($item) =>
                                 "- " . $item->item->name . ": " . $item->quantity . " " . $item->item->unit . " x Rp " . number_format($item->unit_price, 0, ',', '.')
                             )->implode("\n") .
-                            "\n\nTotal: Rp " . number_format($record->total_amount, 0, ',', '.')
-                    ))
+                            "\n\nTotal: Rp " . number_format($record->total_amount, 0, ',', '.');
+                            
+                        // Encode pesan untuk URL WhatsApp
+                        $encodedMessage = urlencode($message);
+                        
+                        return "https://wa.me/{$phoneNumber}?text={$encodedMessage}";
+                    })
                     ->openUrlInNewTab()
                     ->visible(fn(PurchaseOrder $record) => $record->status === 'Approved'),
                 Tables\Actions\Action::make('mark_ordered')

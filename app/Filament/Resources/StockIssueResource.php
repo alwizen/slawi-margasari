@@ -6,6 +6,7 @@ use App\Filament\Resources\StockIssueResource\Pages;
 use App\Filament\Resources\StockIssueResource\RelationManagers;
 use App\Models\StockIssue;
 use App\Models\WarehouseItem;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
@@ -26,7 +27,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class StockIssueResource extends Resource
+class StockIssueResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = StockIssue::class;
 
@@ -77,6 +78,7 @@ class StockIssueResource extends Resource
                     ]),
             ]);
     }
+
 
 
     public static function table(Table $table): Table

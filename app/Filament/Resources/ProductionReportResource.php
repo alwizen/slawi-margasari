@@ -14,9 +14,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 
 class ProductionReportResource extends Resource
 {
@@ -32,53 +34,90 @@ class ProductionReportResource extends Resource
                 ->required()
                 ->reactive()
                 ->afterStateUpdated(function ($state, callable $set) {
-                    // Ambil daily menu item dari tanggal terpilih
-                    $items = DailyMenuItem::whereDate('date', $state)->get(); 
+                    // Reset items when date changes
+                    $set('items', []);
 
-                    $repeaterItems = $items->map(fn($item) => [
-                        'daily_menu_item_id' => $item->id,
-                        'target_qty' => $item->qty,
-                        'actual_qty' => null,
-                        'status' => null,
-                    ])->toArray();
+                    if (!$state) {
+                        return;
+                    }
 
-                    $set('items', $repeaterItems);
-                }),
+                    // Get daily menu items for the selected date
+                    $dailyMenuItems = self::getDailyMenuItemsForDate($state);
+
+                    if ($dailyMenuItems->isEmpty()) {
+                        return;
+                    }
+
+                    // Prepare items data
+                    $items = $dailyMenuItems->map(function ($item) {
+                        return [
+                            'daily_menu_item_id' => $item->id,
+                            'target_qty' => $item->qty,
+                            'actual_qty' => 0,
+                            'status' => 'kurang',
+                        ];
+                    })->toArray();
+
+                    $set('items', $items);
+                })
+                ->columnSpan('full'),
 
             Repeater::make('items')
                 ->label('Item Produksi')
-                ->relationship('items')
+                ->relationship()
                 ->schema([
                     Select::make('daily_menu_item_id')
                         ->label('Menu')
-                        ->disabled()
-                        ->options(DailyMenuItem::all()->pluck('menu_name', 'id')),
+                        ->options(function (callable $get) {
+                            $date = $get('../../date');
+                            if (!$date) {
+                                return [];
+                            }
+                            return self::getDailyMenuItemsForDate($date)->pluck('menu_name', 'id');
+                        })
+                        ->required()
+                        ->reactive(),
 
                     TextInput::make('target_qty')
                         ->label('Target')
                         ->numeric()
-                        ->disabled(),
+                        ->required(),
 
                     TextInput::make('actual_qty')
                         ->label('Realisasi')
                         ->numeric()
                         ->required()
+                        ->default(0)
                         ->reactive()
                         ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                            $target = $get('target_qty');
+                            $target = (int)$get('target_qty');
+                            $actual = (int)$state;
+
                             $status = match (true) {
-                                $state == $target => 'tercukupi',
-                                $state < $target => 'kurang',
-                                $state > $target => 'lebih',
+                                $actual == $target => 'tercukupi',   // Ubah dari 'tercukupi' menjadi 'pas'
+                                $actual < $target => 'kurang',
+                                $actual > $target => 'lebih',
                             };
+
                             $set('status', $status);
                         }),
 
-                    TextInput::make('status')
+                    Select::make('status')
                         ->label('Status')
-                        ->disabled(),
+                        ->required()
+                        ->default('kurang')
+                        ->options([
+                            'kurang' => 'Kurang',
+                            'tercukupi' => 'Pas',
+                            'lebih' => 'Lebih',
+                        ])
+                        ->disabled() // Disabled karena diisi otomatis
+                        ->reactive()
+                        ->dehydrated()
                 ])
-                ->columns(4),
+                ->columns(3)
+                ->columnSpan('full')
+                ->defaultItems(0), // Start with no items
         ]);
     }
 
@@ -86,15 +125,61 @@ class ProductionReportResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('date')
+                    ->label('Tanggal')
+                    ->date(),
+
+                TextColumn::make('items_count')
+                    ->label('Jumlah Item')
+                    ->counts('items'),
+
+                // TextColumn::make('status')
+                //     ->label('Status')
+                //     ->badge()
+                //     ->colors([
+                //         'danger' => 'kurang',
+                //         'success' => 'pas',
+                //         'warning' => 'lebih',
+                //     ]),
+
+                TextColumn::make('items_status_summary')
+                    ->label('Status')
+                    ->getStateUsing(function (ProductionReport $record): string {
+                        $statusCounts = $record->items()
+                            ->selectRaw('status, COUNT(*) as count')
+                            ->groupBy('status')
+                            ->pluck('count', 'status')
+                            ->toArray();
+
+                        $summary = [];
+
+                        if (isset($statusCounts['kurang']) && $statusCounts['kurang'] > 0) {
+                            $summary[] = "{$statusCounts['kurang']} kurang";
+                        }
+
+                        if (isset($statusCounts['pas']) && $statusCounts['pas'] > 0) {
+                            $summary[] = "{$statusCounts['pas']} pas";
+                        }
+
+                        if (isset($statusCounts['lebih']) && $statusCounts['lebih'] > 0) {
+                            $summary[] = "{$statusCounts['lebih']} lebih";
+                        }
+
+                        return implode(', ', $summary);
+                    }),
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -108,6 +193,20 @@ class ProductionReportResource extends Resource
         return [
             //
         ];
+    }
+
+    protected static function getDailyMenuItemsForDate($date): Collection
+    {
+        // Convert date string to proper format if needed
+        if (is_string($date)) {
+            $date = \Carbon\Carbon::parse($date)->format('Y-m-d');
+        }
+
+        return DailyMenuItem::query()
+            ->whereHas('dailyMenu', function ($query) use ($date) {
+                $query->where('date', $date);
+            })
+            ->get();
     }
 
     public static function getPages(): array
