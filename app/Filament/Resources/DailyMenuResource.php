@@ -9,6 +9,7 @@ use App\Models\NutritionPlan;
 use Filament\Actions\Modal\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 // use Filament\Forms\Components\Section;
@@ -47,6 +48,11 @@ class DailyMenuResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $plan = NutritionPlan::with('items.nutrient')->find($state);
+                                
+                                // Set date dari nutrition plan ke field date
+                                if ($plan) {
+                                    $set('date', $plan->date);
+                                }
 
                                 $items = collect($plan?->items)->map(function ($item) {
                                     return [
@@ -60,6 +66,10 @@ class DailyMenuResource extends Resource
 
                                 $set('items', $items);
                             }),
+                            
+                        // Tambahkan field date yang diisi otomatis
+                        Hidden::make('date')
+                            ->required(),
                     ]),
 
                 Card::make()
@@ -97,8 +107,13 @@ class DailyMenuResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nutritionPlan.date')
+                TextColumn::make('date')
                     ->label('Tanggal')
+                    ->date()
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('nutritionPlan.date')
+                    ->label('Tanggal Nutrition Plan')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('items_count')
@@ -114,7 +129,8 @@ class DailyMenuResource extends Resource
                     ->infolist([
                         Section::make('Informasi Umum')
                             ->schema([
-                                TextEntry::make('nutritionPlan.date')->label('Tanggal'),
+                                TextEntry::make('date')->label('Tanggal'),
+                                TextEntry::make('nutritionPlan.date')->label('Tanggal Nutrition Plan'),
                             ]),
                         Section::make('Menu Harian')
                             ->schema([

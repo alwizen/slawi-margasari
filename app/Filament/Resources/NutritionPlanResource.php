@@ -190,7 +190,7 @@ class NutritionPlanResource extends Resource
                                     Hidden::make('unit'),
                                     Hidden::make('item_id'),
                                 ])
-                                ->columns(3),
+                                ->columns(4),
                         ]),
                 ])
                 ->columnSpan('full')

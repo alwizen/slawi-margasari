@@ -115,7 +115,7 @@ class ProductionReportResource extends Resource
                         ->reactive()
                         ->dehydrated()
                 ])
-                ->columns(3)
+                ->columns(4)
                 ->columnSpan('full')
                 ->defaultItems(0), // Start with no items
         ]);

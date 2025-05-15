@@ -16,7 +16,10 @@ use Illuminate\Support\Str;
 class DeliveryResource extends Resource
 {
     protected static ?string $model = Delivery::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    
+    protected static ?string $navigationGroup = 'Produksi & Pengiriman';
+
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
 
     public static function form(Form $form): Form
     {
