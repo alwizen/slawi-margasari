@@ -27,9 +27,9 @@ class NutritionPlanResource extends Resource
 {
     protected static ?string $model = NutritionPlan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-heart';
 
-    protected static ?string $navigationGroup = 'Ahli Gizi';
+    protected static ?string $navigationGroup = 'Gizi & Menu Harian';
 
     protected static ?string $navigationLabel = 'Nutrisi Harian';
 

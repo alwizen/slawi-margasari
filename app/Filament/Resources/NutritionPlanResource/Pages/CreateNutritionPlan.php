@@ -53,6 +53,7 @@ class CreateNutritionPlan extends CreateRecord
                 $dailyMenu = DailyMenu::create([
                     'nutrition_plan_id' => $record->id,
                     'date' => $data['date'],
+                    'qty' => $data['qty'] ?? null, // Tambahkan field qty untuk DailyMenu
                 ]);
 
                 // Buat DailyMenuItem untuk setiap menu_item
@@ -71,6 +72,7 @@ class CreateNutritionPlan extends CreateRecord
                     $dailyMenu->items()->create([
                         'nutrient_id' => $menuItem['nutrient_id'],
                         'menu_name' => $menuItem['menu_name'],
+                        'qty' => $menuItem['qty'] ?? 1, // Tambahkan qty untuk DailyMenuItem dengan default 1
                     ]);
                 }
             }

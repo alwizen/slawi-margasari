@@ -30,9 +30,9 @@ class DailyMenuResource extends Resource
 {
     protected static ?string $model = DailyMenu::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationGroup = 'Menu Harian';
+    protected static ?string $navigationGroup = 'Gizi & Menu Harian';
 
     public static function form(Form $form): Form
     {
